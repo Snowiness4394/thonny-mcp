@@ -191,26 +191,7 @@ You                     AI Agent (Claude/OpenCode)      Thonny MCP              
 
 Here's exactly how you'd work with your AI agent to analyze real data:
 
-### **Step 0: Install Required Packages**
-
-**You:** *"I want to analyze some data with pandas. Do I need to install anything?"*
-
-**AI Agent:**
-*"Yes! Let me install the required packages for data analysis:"
-
-```python
-# Install required packages
-install_package("pandas")
-install_package("pyarrow")  # For reading parquet files
-install_package("matplotlib")
-install_package("numpy")
-```
-
-**AI:** *"✅ Packages installed! Now we can work with data."
-
----
-
-### **Step 1: Download Data**
+### **Step 1: Download Data & Setup**
 
 **You:** *"Let's analyze NYC taxi data. Can you download the January 2023 dataset from the NYC TLC website?"*
 
@@ -238,6 +219,16 @@ print(f"File size: {os.path.getsize(file_path) / (1024*1024):.1f} MB")
 **You:** *"Great! Now let's explore what's in this dataset."*
 
 **AI Agent:**
+*"I'll help you analyze this data. First, let me make sure we have the necessary tools installed, then we'll load and explore the dataset."*
+
+```python
+# First, let's install the packages we need
+install_package("pandas")
+install_package("pyarrow")  # For reading parquet files
+```
+
+**AI:** *"✅ Packages installed! Now let's load the data:"*
+
 ```python
 import pandas as pd
 
@@ -389,54 +380,204 @@ print(f"\nCorrelation between distance and fare: {correlation:.3f}")
 
 ---
 
-## 🎓 Learning With AI
+## 🎓 Learning With AI: Building a Predictive Model
 
-**You:** *"I don't understand this pandas groupby function. Can you explain?"*
+**You:** *"I'm trying to understand Gradient Boosting Machines and how to build a predictive model. Can you walk me through it using this taxi data?"*
 
 **AI Agent:**
-*"Sure! `groupby()` is like creating buckets for your data. Let me show you with our taxi data:"*
+*"Absolutely! Gradient Boosting is like having a team of experts where each one learns from the mistakes of the previous. Let me explain while we build a model to predict taxi fares."*
 
 ```python
-# Simple explanation with example
-print("Grouping by pickup hour and calculating averages:")
-
-hourly_stats = df_clean.groupby('pickup_hour').agg({
-    'fare_amount': 'mean',
-    'trip_distance': 'mean',
-    'passenger_count': 'sum'
-}).round(2)
-
-print(hourly_stats.head(10))
-
-print("\nThink of it like this:")
-print("- groupby('pickup_hour') = 'Put all trips from 9 AM in one bucket'")
-print("- .agg({...}) = 'For each bucket, calculate these statistics'")
-print("- Result = One row per hour with your calculated values")
+# First, let's install the ML libraries we need
+install_package("scikit-learn")
+install_package("xgboost")
+install_package("matplotlib")
 ```
 
-**You:** *"Can you open this in Thonny so I can play with it?"*
+**AI:** *"✅ Great! Now let's build the model step by step:"*
 
-**AI Agent:**
 ```python
-# Save the analysis script
-save_and_run("nyc_taxi_analysis", """
-# NYC Taxi Analysis - Complete Script
 import pandas as pd
+import numpy as np
+from sklearn.model_selection import train_test_split
+from sklearn.ensemble import GradientBoostingRegressor
+from sklearn.metrics import mean_absolute_error, r2_score
 import matplotlib.pyplot as plt
 
-# Load data
+# Load a sample of the data (for faster learning)
 df = pd.read_parquet("C:/Users/You/data_analysis/nyc_taxi/yellow_tripdata_2023-01.parquet")
+df_sample = df.sample(n=10000, random_state=42)  # Small sample for learning
 
-# Add your exploration code here!
-print(f"Loaded {len(df):,} trips")
-print(df.head())
-""")
+print(f"Working with {len(df_sample):,} trips for this tutorial")
+print()
 
-# Now open in Thonny
-open_in_thonny("C:/Users/You/AppData/Local/Programs/Thonny/user_scripts/nyc_taxi_analysis.py")
+# Prepare features for our model
+print("=== Step 1: Prepare Features ===")
+
+# Convert datetime to useful features
+df_sample['hour'] = df_sample['tpep_pickup_datetime'].dt.hour
+df_sample['day_of_week'] = df_sample['tpep_pickup_datetime'].dt.dayofweek
+df_sample['trip_duration'] = (
+    df_sample['tpep_dropoff_datetime'] - df_sample['tpep_pickup_datetime']
+).dt.total_seconds() / 60
+
+# Select features and target
+features = ['trip_distance', 'hour', 'day_of_week', 'passenger_count']
+target = 'fare_amount'
+
+# Clean data
+df_model = df_sample[
+    (df_sample[features].notna().all(axis=1)) &
+    (df_sample[target].notna()) &
+    (df_sample[target] > 0) &
+    (df_sample[target] < 200) &  # Remove extreme outliers
+    (df_sample['trip_distance'] > 0) &
+    (df_sample['trip_distance'] < 50)
+].copy()
+
+X = df_model[features]
+y = df_model[target]
+
+print(f"Features we're using: {features}")
+print(f"Target: {target}")
+print(f"Training data: {len(X):,} trips")
 ```
 
-**Now you can step through the code in Thonny's debugger, modify it, and learn!**
+**AI explains:** *"We're preparing features that might predict fare: distance, time of day, day of week, and passenger count. This is the foundation of any ML model."*
+
+```python
+print("\n=== Step 2: Split Data ===")
+
+# Split into training and testing sets
+X_train, X_test, y_train, y_test = train_test_split(
+    X, y, test_size=0.2, random_state=42
+)
+
+print(f"Training set: {len(X_train):,} trips")
+print(f"Test set: {len(X_test):,} trips")
+```
+
+**AI explains:** *"We split the data so we can train on 80% and test on 20%. This tells us if our model actually learned patterns or just memorized the data."*
+
+```python
+print("\n=== Step 3: Train Gradient Boosting Model ===")
+
+# Create and train the GBM model
+model = GradientBoostingRegressor(
+    n_estimators=100,      # Number of trees (experts)
+    learning_rate=0.1,     # How much each tree learns from errors
+    max_depth=3,           # How complex each tree can be
+    random_state=42
+)
+
+print("Training the model...")
+model.fit(X_train, y_train)
+print("✅ Model trained!")
+
+print("\n=== Step 4: Evaluate ===")
+
+# Make predictions
+y_pred = model.predict(X_test)
+
+# Calculate metrics
+mae = mean_absolute_error(y_test, y_pred)
+r2 = r2_score(y_test, y_pred)
+
+print(f"Mean Absolute Error: ${mae:.2f}")
+print(f"R² Score: {r2:.3f}")
+print()
+print("💡 Interpretation:")
+print(f"   - On average, our predictions are off by ${mae:.2f}")
+print(f"   - The model explains {r2*100:.1f}% of fare variation")
+```
+
+**AI explains:** *"The GBM works by building trees sequentially. Each new tree focuses on fixing the errors of all previous trees combined - that's the 'gradient' part. It's like iterative improvement!"*
+
+```python
+print("\n=== Step 5: Feature Importance ===")
+
+# See which features matter most
+importance = pd.DataFrame({
+    'feature': features,
+    'importance': model.feature_importances_
+}).sort_values('importance', ascending=False)
+
+print("Feature importance (what drives fare predictions):")
+print(importance)
+
+# Visualize
+plt.figure(figsize=(8, 5))
+plt.barh(importance['feature'], importance['importance'])
+plt.xlabel('Importance')
+plt.title('What Drives Taxi Fare Predictions?')
+plt.tight_layout()
+plt.savefig("C:/Users/You/data_analysis/feature_importance.png")
+print("\n📊 Visualization saved!")
+```
+
+**AI summarizes:** *"🎯 We just built a Gradient Boosting model! Key takeaways:
+
+1. **GBM** combines many simple decision trees
+2. Each tree learns from the mistakes of previous trees
+3. **Feature importance** shows distance matters most (no surprise!)
+4. Our model predicts fares within ~${:.2f} on average
+
+You can now predict fares for new trips! Try: `model.predict([[5.0, 14, 2, 1]])` for a 5-mile trip at 2 PM on Tuesday with 1 passenger."*
+
+**You:** *"That's amazing! Can you save this so I can experiment with it in Thonny?"*
+
+**AI Agent:**
+```python
+# Save the complete ML tutorial
+save_and_run("gbm_tutorial", """
+# Gradient Boosting Tutorial - NYC Taxi Fare Prediction
+import pandas as pd
+import numpy as np
+from sklearn.model_selection import train_test_split
+from sklearn.ensemble import GradientBoostingRegressor
+from sklearn.metrics import mean_absolute_error, r2_score
+
+# Load and prepare data
+df = pd.read_parquet("C:/Users/You/data_analysis/nyc_taxi/yellow_tripdata_2023-01.parquet")
+df_sample = df.sample(n=10000, random_state=42)
+
+# Feature engineering
+df_sample['hour'] = df_sample['tpep_pickup_datetime'].dt.hour
+df_sample['day_of_week'] = df_sample['tpep_pickup_datetime'].dt.dayofweek
+
+features = ['trip_distance', 'hour', 'day_of_week', 'passenger_count']
+target = 'fare_amount'
+
+# Clean data
+df_model = df_sample[
+    (df_sample[features].notna().all(axis=1)) &
+    (df_sample[target].notna()) &
+    (df_sample[target] > 0) &
+    (df_sample[target] < 200)
+].copy()
+
+X = df_model[features]
+y = df_model[target]
+
+# Split and train
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
+
+model = GradientBoostingRegressor(n_estimators=100, learning_rate=0.1, max_depth=3)
+model.fit(X_train, y_train)
+
+# Make a prediction!
+new_trip = [[5.0, 14, 2, 1]]  # 5 miles, 2 PM, Tuesday, 1 passenger
+predicted_fare = model.predict(new_trip)[0]
+print(f"Predicted fare: ${predicted_fare:.2f}")
+
+# TODO: Try changing the values above and see how predictions change!
+""")
+
+# Open in Thonny for experimentation
+open_in_thonny("C:/Users/You/AppData/Local/Programs/Thonny/user_scripts/gbm_tutorial.py")
+```
+
+**Now you have a working ML model in Thonny to experiment with! Try changing the trip parameters and see how predictions change. This is how you learn! 🚀**
 
 ---
 
