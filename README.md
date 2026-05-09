@@ -16,6 +16,8 @@ Use AI agents to analyze your data **without it ever leaving your computer**. Th
 - **Students** learning data science with AI guidance
 - **Anyone** who wants AI assistance without cloud dependencies
 
+> **⚠️ Windows Only:** This tool is specifically designed for Windows users. Linux and macOS already have Python available in the terminal, so this MCP isn't needed there. If you're on Linux/macOS, just use your system Python directly!
+
 ---
 
 ## 🔒 Privacy-First Design
@@ -50,6 +52,9 @@ Use AI agents to analyze your data **without it ever leaving your computer**. Th
 - ✅ **Isolated environment** - Won't conflict with system
 - ✅ **Open Thonny IDE** - Debug and modify AI-generated code
 - ✅ **Install any package** - Full PyPI access via pip
+- ✅ **Windows-focused** - Solves the "Windows doesn't have Python" problem
+
+> 💡 **Why Windows only?** Linux and macOS come with Python pre-installed in the terminal. Windows doesn't, which creates friction for data analysts. This MCP solves that specific problem!
 
 ---
 
