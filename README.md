@@ -105,42 +105,7 @@ Replace `YOUR_USERNAME` with your Windows username.
 
 ---
 
-### ⚡ Quick Setup Summary (Claude Desktop)
-
-**Just want the commands? Here you go:**
-
-```bash
-# 1. Install Thonny from https://thonny.org
-
-# 2. Open Thonny, go to View → Shell, then run:
-%pip install thonny-mcp
-
-# 3. Get your Python path (in Thonny Shell):
-import sys
-print(sys.executable)
-# Output: C:/Users/You/AppData/Local/Programs/Thonny/python.exe
-
-# 4. Add to Claude Desktop config (%APPDATA%\Claude\claude_desktop_config.json):
-```
-
-```json
-{
-  "mcpServers": {
-    "thonny-python": {
-      "command": "C:/Users/You/AppData/Local/Programs/Thonny/python.exe",
-      "args": ["-m", "thonny_mcp.server"]
-    }
-  }
-}
-```
-
-```bash
-# 5. Restart Claude Desktop. Done!
-```
-
----
-
-### Step 4: Alternative - OpenCode CLI (Recommended for Privacy!)
+### Alternative - OpenCode CLI (Recommended for Privacy!)
 
 **[OpenCode CLI](https://github.com/anomalyco/opencode)** is a fantastic choice for private, local AI assistance:
 
@@ -210,6 +175,25 @@ You                     AI Agent (Claude/OpenCode)      Thonny MCP              
 ## 📊 Real-World Example: NYC Taxi Data Analysis
 
 Here's exactly how you'd work with your AI agent to analyze real data:
+
+### **Step 0: Install Required Packages**
+
+**You:** *"I want to analyze some data with pandas. Do I need to install anything?"*
+
+**AI Agent:**
+*"Yes! Let me install the required packages for data analysis:"
+
+```python
+# Install required packages
+install_package("pandas")
+install_package("pyarrow")  # For reading parquet files
+install_package("matplotlib")
+install_package("numpy")
+```
+
+**AI:** *"✅ Packages installed! Now we can work with data."
+
+---
 
 ### **Step 1: Download Data**
 
