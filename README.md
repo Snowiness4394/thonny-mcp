@@ -27,24 +27,40 @@ Perfect for data analysts, scientists, and anyone who wants a clean, working Pyt
 3. Run the installer (takes ~30 seconds)
 4. Done! 🎉
 
-### Step 2: Install This MCP Server
+### Step 2: Install This MCP Server (Inside Thonny!)
 
+Open Thonny, then:
+
+**Option A: Via Thonny's GUI**
+1. Go to **Tools** → **Manage packages...**
+2. Search for `thonny-mcp`
+3. Click **Install**
+
+**Option B: Via Thonny's Shell**
 ```bash
-pip install thonny-mcp
+# Open Thonny, then open the Shell (View → Shell)
+# Or press Ctrl+` (backtick)
+
+# Then run:
+%pip install thonny-mcp
 ```
+
+This installs `thonny-mcp` **inside Thonny's isolated environment**, keeping everything clean!
 
 ### Step 3: Configure Your AI Assistant
 
+**Important:** Use the full path to Thonny's Python to run the MCP server:
+
 **Claude Desktop:**
 
-Add to `claude_desktop_config.json`:
+Add to `%APPDATA%\Claude\claude_desktop_config.json`:
 
 ```json
 {
   "mcpServers": {
     "thonny-python": {
-      "command": "thonny-mcp",
-      "args": []
+      "command": "C:/Users/YOUR_USERNAME/AppData/Local/Programs/Thonny/python.exe",
+      "args": ["-m", "thonny_mcp.server"]
     }
   }
 }
@@ -58,7 +74,8 @@ Add to `.cursor/mcp.json`:
 {
   "mcpServers": {
     "thonny-python": {
-      "command": "thonny-mcp"
+      "command": "C:/Users/YOUR_USERNAME/AppData/Local/Programs/Thonny/python.exe",
+      "args": ["-m", "thonny_mcp.server"]
     }
   }
 }
@@ -72,11 +89,32 @@ Add to `~/.codeium/windsurf/mcp_config.json`:
 {
   "mcpServers": {
     "thonny-python": {
-      "command": "thonny-mcp"
+      "command": "C:/Users/YOUR_USERNAME/AppData/Local/Programs/Thonny/python.exe",
+      "args": ["-m", "thonny_mcp.server"]
     }
   }
 }
 ```
+
+**💡 Pro Tip:** The path follows this pattern:
+- `C:/Users/[YOUR_USERNAME]/AppData/Local/Programs/Thonny/python.exe`
+
+Just replace `YOUR_USERNAME` with your Windows username!
+
+**🔍 Finding Your Exact Path:**
+
+Open Thonny and go to **Tools** → **Open system shell...**, then type:
+```bash
+where python
+```
+
+Or in Thonny's Shell (View → Shell):
+```python
+import sys
+print(sys.executable)
+```
+
+Copy that path and use it in your config!
 
 Restart your AI assistant and you're ready to go!
 
