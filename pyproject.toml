@@ -4,7 +4,7 @@ build-backend = "hatchling.build"
 
 [project]
 name = "thonny-mcp"
-version = "0.1.1"
+version = "0.1.2"
 description = "MCP server for executing Python via Thonny's isolated environment"
 readme = "README.md"
 license = {text = "MIT"}
@@ -49,10 +49,10 @@ dev = [
 thonny-mcp = "thonny_mcp.server:mcp.run"
 
 [project.urls]
-Homepage = "https://github.com/yourusername/thonny-mcp"
-Documentation = "https://github.com/yourusername/thonny-mcp#readme"
-Repository = "https://github.com/yourusername/thonny-mcp"
-Issues = "https://github.com/yourusername/thonny-mcp/issues"
+Homepage = "https://github.com/Snowiness4394/thonny-mcp"
+Documentation = "https://github.com/Snowiness4394/thonny-mcp#readme"
+Repository = "https://github.com/Snowiness4394/thonny-mcp"
+Issues = "https://github.com/Snowiness4394/thonny-mcp/issues"
 
 [tool.hatch.build.targets.wheel]
 packages = ["thonny_mcp"]
