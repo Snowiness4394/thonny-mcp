@@ -103,9 +103,46 @@ Replace `YOUR_USERNAME` with your Windows username.
 
 **Restart Claude Desktop.** You're ready!
 
+---
+
+### ⚡ Quick Setup Summary (Claude Desktop)
+
+**Just want the commands? Here you go:**
+
+```bash
+# 1. Install Thonny from https://thonny.org
+
+# 2. Open Thonny, go to View → Shell, then run:
+%pip install thonny-mcp
+
+# 3. Get your Python path (in Thonny Shell):
+import sys
+print(sys.executable)
+# Output: C:/Users/You/AppData/Local/Programs/Thonny/python.exe
+
+# 4. Add to Claude Desktop config (%APPDATA%\Claude\claude_desktop_config.json):
+```
+
+```json
+{
+  "mcpServers": {
+    "thonny-python": {
+      "command": "C:/Users/You/AppData/Local/Programs/Thonny/python.exe",
+      "args": ["-m", "thonny_mcp.server"]
+    }
+  }
+}
+```
+
+```bash
+# 5. Restart Claude Desktop. Done!
+```
+
+---
+
 ### Step 4: Alternative - OpenCode CLI (Recommended for Privacy!)
 
-**[OpenCode CLI](https://github.com/opencode-ai/opencode)** is a fantastic choice for private, local AI assistance:
+**[OpenCode CLI](https://github.com/anomalyco/opencode)** is a fantastic choice for private, local AI assistance:
 
 1. **Install OpenCode CLI:**
    ```bash
