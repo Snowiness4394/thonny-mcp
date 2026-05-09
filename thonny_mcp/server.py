@@ -3,18 +3,23 @@ Thonny MCP Server
 
 Execute Python code using Thonny's isolated environment.
 Designed for Windows users who want a clean, working Python setup.
+
+Usage:
+    thonny-mcp
+    thonny-mcp --location "C:/Custom/Path/To/Thonny/python.exe"
 """
 
 from mcp.server.fastmcp import FastMCP
 import subprocess
 import sys
 import os
+import argparse
 from pathlib import Path
 from typing import Optional
 import json
 
-# Create MCP server instance
-mcp = FastMCP("ThonnyPython")
+# Global variable for Python executable path (set at runtime)
+PYTHON_EXE: Optional[str] = None
 
 
 def find_thonny_python() -> Optional[Path]:
@@ -22,17 +27,18 @@ def find_thonny_python() -> Optional[Path]:
     Find Thonny's Python executable on Windows.
     
     Checks common installation locations in order:
-    1. User install (AppData/Local)
-    2. Program Files
-    3. Program Files (x86)
-    4. Portable installs (C:/Thonny)
-    5. Custom user path (~/Thonny)
+    1. User install (AppData/Local) - most common
+    2. System-wide install (Program Files)
+    3. 32-bit install (Program Files x86)
+    4. Portable installs
+    5. Custom user paths
+    6. PATH environment variable (fallback)
     
     Returns:
         Path to python.exe if found, None otherwise
     """
     possible_paths = [
-        # User install (most common)
+        # User install (most common ~90% of cases)
         Path.home() / "AppData/Local/Programs/Thonny/python.exe",
         # System-wide install
         Path("C:/Program Files/Thonny/python.exe"),
@@ -42,25 +48,56 @@ def find_thonny_python() -> Optional[Path]:
         Path("C:/Thonny/python.exe"),
         # Custom user path
         Path.home() / "Thonny/python.exe",
+        # Alternative drive (D:)
+        Path("D:/Thonny/python.exe"),
+        Path("D:/Program Files/Thonny/python.exe"),
     ]
     
+    # Check standard locations first
     for path in possible_paths:
         if path.exists():
             return path
     
+    # Fallback: Check if thonny is in PATH
+    try:
+        import shutil
+        thonny_path = shutil.which("thonny")
+        if thonny_path:
+            # thonny.exe is usually in the same directory as python.exe
+            path = Path(thonny_path).parent / "python.exe"
+            if path.exists():
+                return path
+    except Exception:
+        pass
+    
     return None
 
 
-def get_python_exe() -> str:
+def get_python_exe(location: Optional[str] = None) -> str:
     """
     Get Thonny's Python executable path.
     
+    Args:
+        location: Optional hardcoded path to Python executable
+        
     Returns:
         String path to Python executable
         
     Raises:
         RuntimeError: If Thonny is not found
     """
+    # If user provided a location, use it
+    if location:
+        path = Path(location)
+        if path.exists():
+            return str(path)
+        else:
+            raise RuntimeError(
+                f"❌ Custom location not found: {location}\n\n"
+                "Please check the path and try again."
+            )
+    
+    # Otherwise, try to auto-detect
     thonny_python = find_thonny_python()
     
     if thonny_python:
@@ -74,13 +111,16 @@ def get_python_exe() -> str:
         "2. Download: thonny-xx.x.exe\n"
         "3. Run the installer\n"
         "4. Restart your AI assistant\n\n"
-        "Thonny provides an isolated Python environment\n"
-        "that's perfect for AI agents and data analysis!"
+        "If Thonny is already installed in a custom location,\n"
+        "you can specify it using the --location argument:\n\n"
+        "  thonny-mcp --location \"C:/Your/Custom/Path/Thonny/python.exe\"\n\n"
+        "Or in your MCP config:\n"
+        '  "args": ["--location", "C:/Your/Path/Thonny/python.exe"]'
     )
 
 
-# Cache the Python path at module load
-PYTHON_EXE = get_python_exe()
+# Create MCP server instance
+mcp = FastMCP("ThonnyPython")
 
 
 @mcp.tool()
@@ -103,6 +143,8 @@ def execute(code: str, timeout: int = 60) -> dict:
         execute("print('Hello World')")
         execute("import pandas as pd; df = pd.DataFrame(); print(df)")
     """
+    global PYTHON_EXE
+    
     try:
         result = subprocess.run(
             [PYTHON_EXE, "-c", code],
@@ -148,6 +190,8 @@ def install_package(package: str, upgrade: bool = False) -> dict:
         install_package("pandas")
         install_package("requests", upgrade=True)
     """
+    global PYTHON_EXE
+    
     cmd = [PYTHON_EXE, "-m", "pip", "install"]
     if upgrade:
         cmd.append("--upgrade")
@@ -196,6 +240,8 @@ def list_packages() -> list:
             {"name": "numpy", "version": "1.24.0"}
         ]
     """
+    global PYTHON_EXE
+    
     try:
         result = subprocess.run(
             [PYTHON_EXE, "-m", "pip", "list", "--format=json"],
@@ -225,6 +271,8 @@ def get_environment_info() -> dict:
         - thonny_path: Directory where Thonny is installed
         - python_executable: Full path to python.exe
     """
+    global PYTHON_EXE
+    
     info = {
         "python_version": "Unknown",
         "pip_version": "Unknown", 
@@ -279,6 +327,8 @@ def open_in_thonny(file_path: Optional[str] = None) -> dict:
         open_in_thonny()  # Just open Thonny
         open_in_thonny("C:/Users/Me/analysis.py")  # Open specific file
     """
+    global PYTHON_EXE
+    
     thonny_exe = Path(PYTHON_EXE).parent / "thonny.exe"
     
     if not thonny_exe.exists():
@@ -324,6 +374,8 @@ def save_and_run(script_name: str, code: str) -> dict:
     Example:
         save_and_run("analysis", "import pandas as pd; print(pd.__version__)")
     """
+    global PYTHON_EXE
+    
     # Create a scripts directory in Thonny's folder
     thonny_dir = Path(PYTHON_EXE).parent
     scripts_dir = thonny_dir / "user_scripts"
@@ -378,12 +430,12 @@ def check_thonny_installed() -> dict:
     Returns:
         Dictionary with installation status and path if found
     """
-    thonny_path = find_thonny_python()
+    global PYTHON_EXE
     
-    if thonny_path:
+    if PYTHON_EXE and Path(PYTHON_EXE).exists():
         return {
             "installed": True,
-            "python_path": str(thonny_path),
+            "python_path": PYTHON_EXE,
             "message": "✅ Thonny found! Ready to execute Python code."
         }
     else:
@@ -393,13 +445,43 @@ def check_thonny_installed() -> dict:
             "message": (
                 "❌ Thonny not found.\n\n"
                 "Install from https://thonny.org\n"
-                "Then restart your AI assistant."
+                "Then restart your AI assistant.\n\n"
+                "Or use --location to specify a custom path:\n"
+                '  thonny-mcp --location "C:/Your/Path/Thonny/python.exe"'
             )
         }
 
 
+def main():
+    """Main entry point with argument parsing."""
+    global PYTHON_EXE
+    
+    parser = argparse.ArgumentParser(
+        description="Thonny MCP Server - Execute Python via Thonny's isolated environment"
+    )
+    parser.add_argument(
+        "--location",
+        type=str,
+        help="Custom path to Thonny's python.exe (optional)"
+    )
+    parser.add_argument(
+        "--version",
+        action="version",
+        version="%(prog)s 0.1.3"
+    )
+    
+    args = parser.parse_args()
+    
+    # Get Python executable (from args or auto-detect)
+    try:
+        PYTHON_EXE = get_python_exe(location=args.location)
+        print(f"🚀 Starting Thonny MCP Server...")
+        print(f"📍 Using Python: {PYTHON_EXE}")
+        mcp.run()
+    except RuntimeError as e:
+        print(str(e), file=sys.stderr)
+        sys.exit(1)
+
+
 if __name__ == "__main__":
-    # Start the MCP server
-    print(f"🚀 Starting Thonny MCP Server...")
-    print(f"📍 Using Python: {PYTHON_EXE}")
-    mcp.run()
+    main()

@@ -7,6 +7,6 @@ for clean, isolated Python execution on Windows.
 Perfect for data analysts and scientists who want a frictionless Python setup!
 """
 
-__version__ = "0.1.2"
+__version__ = "0.1.3"
 __author__ = "Community"
 __description__ = "MCP server for Thonny Python execution"

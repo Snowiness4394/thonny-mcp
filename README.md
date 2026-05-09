@@ -116,6 +116,39 @@ Replace `YOUR_USERNAME` with your Windows username.
 
 ---
 
+### 🔧 Custom Installation Location (Optional)
+
+If Thonny is installed in a non-standard location and auto-detection fails, you can specify the path manually using the `--location` argument:
+
+**Claude Desktop with custom path:**
+```json
+{
+  "mcpServers": {
+    "thonny-python": {
+      "command": "C:/Users/YOUR_USERNAME/AppData/Local/Programs/Thonny/python.exe",
+      "args": [
+        "-m",
+        "thonny_mcp.server",
+        "--location",
+        "D:/Custom/Path/Thonny/python.exe"
+      ]
+    }
+  }
+}
+```
+
+**Command line usage:**
+```bash
+thonny-mcp --location "D:/Custom/Path/Thonny/python.exe"
+```
+
+This is useful if you:
+- Installed Thonny on a different drive (D:, E:, etc.)
+- Use a portable version of Thonny
+- Have Thonny in a custom directory
+
+---
+
 ### Alternative - OpenCode CLI (Recommended for Privacy!)
 
 **[OpenCode CLI](https://github.com/anomalyco/opencode)** is a fantastic choice for private, local AI assistance:
