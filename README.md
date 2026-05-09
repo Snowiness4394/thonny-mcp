@@ -86,6 +86,12 @@ Copy that path (e.g., `C:/Users/You/AppData/Local/Programs/Thonny/python.exe`)
 
 **Configure Claude Desktop:**
 
+**Option A - Via Settings (Easiest):**
+1. Open Claude Desktop
+2. Go to **Settings** → **Developer** → **Edit Config**
+3. Add the configuration below
+
+**Option B - Manual:**
 Edit `%APPDATA%\Claude\claude_desktop_config.json`:
 
 ```json
@@ -121,14 +127,23 @@ Replace `YOUR_USERNAME` with your Windows username.
    - Private and secure
 
 3. **Configure OpenCode with Thonny MCP:**
-   
-   Create `.opencode/mcp.json` in your project folder:
+
+   Edit your OpenCode config file:
+   - **Windows:** `%USERPROFILE%\.config\opencode\opencode.json`
+   - **Project-specific:** `opencode.json` in your project folder
+
+   Add this configuration:
    ```json
    {
-     "mcpServers": {
+     "mcp": {
        "thonny-python": {
-         "command": "C:/Users/YOUR_USERNAME/AppData/Local/Programs/Thonny/python.exe",
-         "args": ["-m", "thonny_mcp.server"]
+         "type": "local",
+         "command": [
+           "C:/Users/YOUR_USERNAME/AppData/Local/Programs/Thonny/python.exe",
+           "-m",
+           "thonny_mcp.server"
+         ],
+         "enabled": true
        }
      }
    }
