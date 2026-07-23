@@ -150,6 +150,8 @@ def execute(code: str, timeout: int = 60) -> dict:
             [PYTHON_EXE, "-c", code],
             capture_output=True,
             text=True,
+            stdin=subprocess.DEVNULL,
+            creationflags=getattr(subprocess, "CREATE_NO_WINDOW", 0),
             timeout=timeout
         )
         return {
@@ -202,6 +204,8 @@ def install_package(package: str, upgrade: bool = False) -> dict:
             cmd,
             capture_output=True,
             text=True,
+            stdin=subprocess.DEVNULL,
+            creationflags=getattr(subprocess, "CREATE_NO_WINDOW", 0),
             timeout=120  # Package installs can take time
         )
         
@@ -247,6 +251,8 @@ def list_packages() -> list:
             [PYTHON_EXE, "-m", "pip", "list", "--format=json"],
             capture_output=True,
             text=True,
+            stdin=subprocess.DEVNULL,
+            creationflags=getattr(subprocess, "CREATE_NO_WINDOW", 0),
             timeout=30
         )
         
@@ -286,6 +292,8 @@ def get_environment_info() -> dict:
             [PYTHON_EXE, "--version"],
             capture_output=True,
             text=True,
+            stdin=subprocess.DEVNULL,
+            creationflags=getattr(subprocess, "CREATE_NO_WINDOW", 0),
             timeout=10
         )
         if result.returncode == 0:
@@ -299,6 +307,8 @@ def get_environment_info() -> dict:
             [PYTHON_EXE, "-m", "pip", "--version"],
             capture_output=True,
             text=True,
+            stdin=subprocess.DEVNULL,
+            creationflags=getattr(subprocess, "CREATE_NO_WINDOW", 0),
             timeout=10
         )
         if result.returncode == 0:
@@ -396,6 +406,8 @@ def save_and_run(script_name: str, code: str) -> dict:
             [PYTHON_EXE, str(script_path)],
             capture_output=True,
             text=True,
+            stdin=subprocess.DEVNULL,
+            creationflags=getattr(subprocess, "CREATE_NO_WINDOW", 0),
             timeout=60
         )
         
@@ -475,8 +487,8 @@ def main():
     # Get Python executable (from args or auto-detect)
     try:
         PYTHON_EXE = get_python_exe(location=args.location)
-        print(f"🚀 Starting Thonny MCP Server...")
-        print(f"📍 Using Python: {PYTHON_EXE}")
+        print(f"🚀 Starting Thonny MCP Server...", file=sys.stderr)
+        print(f"📍 Using Python: {PYTHON_EXE}", file=sys.stderr)
         mcp.run()
     except RuntimeError as e:
         print(str(e), file=sys.stderr)
